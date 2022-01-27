@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,26 +24,33 @@ public class AlimentsEndpoint {
         this.alimentService = alimentService;
     }
 
+    //get all aliment
     @GetMapping("/")
     public ResponseEntity<List<Aliment>> getAliments() {
         return ResponseEntity.ok().body(alimentService.getAliment());
     }
 
+    //create aliment
     @PostMapping("/")
     public ResponseEntity<Aliment> createAliment(@RequestBody Aliment aliment) {
-        return ResponseEntity.ok().body(alimentService.createAliment(aliment.getName(), aliment.getPrice()));
+        return ResponseEntity.ok().body(alimentService.createAliment(aliment.getName(), aliment.getType()));
     }
 
+
     @DeleteMapping("/")
-    public ResponseEntity<Void> deleteAliment(@RequestBody Aliment aliment) {
-        alimentService.deleteAliment(aliment.getId());
-        return ResponseEntity.status(204).build();
+    public ResponseEntity<String> deleteAliment(@RequestBody Aliment aliment) throws Exception {
+        Boolean res = alimentService.deleteAliment(aliment.getId());
+
+        if(res) {
+            return ResponseEntity.status(204).build();
+        }else{
+            return ResponseEntity.status(200).body("aliment no exist");
+        }
     }
 
     @PutMapping("/")
-    public ResponseEntity<Aliment> modifyAliment(@RequestBody Aliment aliment) {
+    public ResponseEntity<Boolean> modifyAliment(@RequestBody Aliment aliment) {
 
-        return ResponseEntity.ok().body(alimentService.createAliment("carte",100));
-
+        return ResponseEntity.ok().body(alimentService.modifyAliment(aliment.getId(),aliment.getName(), aliment.getType()));
     }
 }

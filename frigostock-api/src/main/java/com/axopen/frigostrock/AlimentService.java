@@ -1,14 +1,15 @@
 package com.axopen.frigostrock;
 
 
-import com.axopen.frigostrock.model.Tables;
 import com.axopen.frigostrock.model.tables.pojos.Aliment;
 import com.axopen.frigostrock.model.tables.records.AlimentRecord;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.UpdateResultStep;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.axopen.frigostrock.model.Tables.ALIMENT;
 
@@ -27,28 +28,34 @@ public class AlimentService {
                 .fetchInto(Aliment.class);
     }
 
-    public Aliment createAliment(String name, Integer price) {
+    public Aliment createAliment(String name, String type) {
         AlimentRecord aliment = dslContext.newRecord(ALIMENT);
         aliment.setName(name);
-        aliment.setPrice(price);
+        aliment.setType(type);
         aliment.insert();
 
         return aliment.into(Aliment.class);
     }
 
-    public void deleteAliment(Integer id) {
-        dslContext.delete(ALIMENT)
+    public Boolean deleteAliment(Integer id) throws Exception {
+        int deleted = dslContext.delete(ALIMENT)
                 .where(ALIMENT.ID.eq(id))
                 .execute();
+
+        return deleted != 0;
+
     }
 
-    public Aliment modifyAliment(Integer id) {
-        AlimentRecord aliment = dslContext.newRecord(ALIMENT);
-        aliment.setName("name");
-        aliment.setPrice(100);
-        aliment.insert();
+    public Boolean modifyAliment(Integer id, String name, String type) {
 
-        return aliment.into(Aliment.class);
+            Integer count = dslContext.update(ALIMENT)
+                    .set(ALIMENT.NAME, name)
+                    .set(ALIMENT.TYPE, type)
+                    .where(ALIMENT.ID.eq(id))
+                    .returningResult(ALIMENT.ID)
+                    .fetchOne().getValue(ALIMENT.ID);
+
+            return count != null;
+
     }
-
 }
